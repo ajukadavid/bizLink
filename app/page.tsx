@@ -1,13 +1,35 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
-import { useQuery, Authenticated, Unauthenticated, AuthLoading } from "convex/react";
+import { useUser, SignInButton, SignOutButton } from "@clerk/nextjs";
+import { useQuery, useMutation, Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { SignInButton, SignOutButton } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
 
 function AuthenticatedContent() {
   const { user } = useUser();
   const currentUser = useQuery(api.users.getCurrentUser);
+  const ensureUserExists = useMutation(api.users.ensureUserExists);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  useEffect(() => {
+    async function syncUser() {
+      if (user && currentUser === null && !isSyncing) {
+        setIsSyncing(true);
+        try {
+          await ensureUserExists({
+            clerkId: user.id,
+            email: user.emailAddresses[0]?.emailAddress ?? "",
+          });
+        } catch (error) {
+          console.error("Failed to sync user:", error);
+        } finally {
+          setIsSyncing(false);
+        }
+      }
+    }
+
+    syncUser();
+  }, [user, currentUser, ensureUserExists, isSyncing]);
 
   return (
     <div>
@@ -16,7 +38,7 @@ function AuthenticatedContent() {
         <div>Loading user data...</div>
       ) : currentUser === null ? (
         <div>
-          <p>User not found in database. Please wait for sync or contact support.</p>
+          <p>Setting up your account...</p>
         </div>
       ) : (
         <div>
