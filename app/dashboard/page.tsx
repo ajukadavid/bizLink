@@ -17,12 +17,28 @@ export default function Dashboard() {
     );
   }
 
-  const stats = [
-    { icon: Users, label: "Total Users", value: "1,234", color: "bg-primary-green" },
-    { icon: Building, label: "Businesses", value: "567", color: "bg-accent-blue" },
-    { icon: DollarSign, label: "Total Revenue", value: "$45.2K", color: "bg-gold" },
-    { icon: TrendingUp, label: "Growth", value: "+23%", color: "bg-light-green" },
-  ];
+  // Handle case where user is not found in Convex (not synced yet or auth error)
+  if (currentUser === null) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-bg-dark">
+        <div className="w-12 h-12 rounded-full border-4 border-primary-green border-t-gold animate-spin"></div>
+        <p className="mt-4 text-white">Syncing profile...</p>
+      </div>
+    );
+  }
+
+  // Redirect to onboarding if role is "user" (unconfigured)
+  if (currentUser.role === "user") {
+    // Prevent flicker by showing loading or just executing push immediately
+    // In strict mode this might double fire but router.push is safe.
+    router.push("/onboarding");
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-bg-dark">
+        <div className="w-12 h-12 rounded-full border-4 border-primary-green border-t-gold animate-spin"></div>
+        <p className="mt-4 text-white">Redirecting to onboarding...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

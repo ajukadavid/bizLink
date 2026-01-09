@@ -28,7 +28,7 @@ export const ensureUserExists = mutation({
     const userId = await ctx.db.insert("users", {
       clerkId: args.clerkId,
       email: args.email,
-      role: "business_owner", // Default role, can be changed by admin
+      role: "user", // Default role, triggers onboarding flow
       status: "active",
     });
 
@@ -40,7 +40,7 @@ export const ensureUserExists = mutation({
       newState: "active",
       metadata: {
         email: args.email,
-        defaultRole: "business_owner",
+        defaultRole: "user",
       },
     });
 
